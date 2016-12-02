@@ -279,7 +279,7 @@ module.exports = (function() {
         mf.currency = translate(targetLocale, 'CURRENCY')||'USD';
       }
       if (MessageformatFormatters) {
-        Messageformat.addFormatters(MessageformatFormatters);
+        mf.addFormatters(MessageformatFormatters);
       }
       mf.compiledFunctions = {};
       MessageformatInstanceForLocale[targetLocale] = mf;
