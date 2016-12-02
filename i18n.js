@@ -27,6 +27,8 @@ var vsprintf = require('sprintf-js').vsprintf,
 module.exports = (function() {
 
   var MessageformatInstanceForLocale = {},
+      MessageformatIntlSupport = false,
+      MessageformatFormatters = null,
     PluralsForLocale = {},
     locales = {},
     api = {
@@ -174,6 +176,12 @@ module.exports = (function() {
         });
       }
     }
+
+    // Iniciar MessageFormat com suporte ao Intl
+    MessageformatIntlSupport = (typeof opt.MessageformatIntlSupport === 'boolean') ? opt.MessageformatIntlSupport : false;
+
+    // Adiciona os formatters ao MessageFormat ao iniciá-lo
+    MessageformatFormatters = (typeof opt.MessageformatFormatters === 'object') ? opt.MessageformatFormatters : null;
   };
 
   i18n.init = function i18nInit(request, response, next) {
@@ -265,8 +273,14 @@ module.exports = (function() {
     if (MessageformatInstanceForLocale[targetLocale]) {
       mf = MessageformatInstanceForLocale[targetLocale];
     } else {
-      mf = new Messageformat(targetLocale).setIntlSupport(true);
-      mf.currency = translate(targetLocale, 'CURRENCY')||'USD';
+      mf = new Messageformat(targetLocale);
+      if (MessageformatIntlSupport) {
+        mf.setIntlSupport(true);
+        mf.currency = translate(targetLocale, 'CURRENCY')||'USD';
+      }
+      if (MessageformatFormatters) {
+        Messageformat.addFormatters(MessageformatFormatters);
+      }
       mf.compiledFunctions = {};
       MessageformatInstanceForLocale[targetLocale] = mf;
     }
