@@ -523,6 +523,7 @@ module.exports = (function() {
     delete locales[locale];
   };
 
+  i18n._Messageformat = Messageformat;
   i18n._MessageformatInstanceForLocale = MessageformatInstanceForLocale;
 
   // ===================
