@@ -265,7 +265,8 @@ module.exports = (function() {
     if (MessageformatInstanceForLocale[targetLocale]) {
       mf = MessageformatInstanceForLocale[targetLocale];
     } else {
-      mf = new Messageformat(targetLocale);
+      mf = new Messageformat(targetLocale).setIntlSupport(true);
+      mf.currency = translate(targetLocale, 'CURRENCY')||'USD';
       mf.compiledFunctions = {};
       MessageformatInstanceForLocale[targetLocale] = mf;
     }
