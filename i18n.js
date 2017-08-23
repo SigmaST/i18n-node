@@ -9,7 +9,7 @@
 'use strict';
 
 // dependencies
-var vsprintf = require('sprintf-js').vsprintf,
+let vsprintf = require('sprintf-js').vsprintf,
   fs = require('fs'),
   url = require('url'),
   path = require('path'),
@@ -26,7 +26,7 @@ var vsprintf = require('sprintf-js').vsprintf,
 // exports an instance
 module.exports = (function() {
 
-  var MessageformatInstanceForLocale = {},
+  let MessageformatInstanceForLocale = {},
       MessageformatIntlSupport = false,
       MessageformatFormatters = null,
     PluralsForLocale = {},
@@ -65,7 +65,7 @@ module.exports = (function() {
     syncFiles;
 
   // public exports
-  var i18n = {};
+  let i18n = {};
 
   i18n.version = '0.8.3';
 
@@ -77,9 +77,9 @@ module.exports = (function() {
     // Provide custom API method aliases if desired
     // This needs to be processed before the first call to applyAPItoObject()
     if (opt.api && typeof opt.api === 'object') {
-      for (var method in opt.api) {
+      for (let method in opt.api) {
         if (opt.api.hasOwnProperty(method)) {
-          var alias = opt.api[method];
+          let alias = opt.api[method];
           if (typeof api[method] !== 'undefined') {
             api[method] = alias;
           }
@@ -154,6 +154,13 @@ module.exports = (function() {
     // when missing locales we try to guess that from directory
     opt.locales = opt.locales || guessLocales(directory);
 
+    if(opt.read){
+      read = opt.read(locales);
+    }
+    if(opt.write){
+      write = opt.write(locales);
+    }
+
     // implicitly read all locales
     if (Array.isArray(opt.locales)) {
 
@@ -166,7 +173,7 @@ module.exports = (function() {
 
         // watch changes of locale files (it's called twice because fs.watch is still unstable)
         fs.watch(directory, function(event, filename) {
-          var localeFromFile = guessLocaleFromFile(filename);
+          let localeFromFile = guessLocaleFromFile(filename);
 
           if (localeFromFile && opt.locales.indexOf(localeFromFile) > -1) {
             logDebug('Auto reloading locale file "' + filename + '".');
@@ -213,10 +220,10 @@ module.exports = (function() {
   };
 
   i18n.__ = function i18nTranslate(phrase) {
-    var msg;
-    var argv = parseArgv(arguments);
-    var namedValues = argv[0];
-    var args = argv[1];
+    let msg;
+    let argv = parseArgv(arguments);
+    let namedValues = argv[0];
+    let args = argv[1];
 
     // called like __({phrase: "Hello", locale: "en"})
     if (typeof phrase === 'object') {
@@ -245,11 +252,11 @@ module.exports = (function() {
   };
 
   i18n.__mf = function i18nMessageformat(phrase) {
-    var msg, mf, f;
-    var targetLocale = defaultLocale;
-    var argv = parseArgv(arguments);
-    var namedValues = argv[0];
-    var args = argv[1];
+    let msg, mf, f;
+    let targetLocale = defaultLocale;
+    let argv = parseArgv(arguments);
+    let namedValues = argv[0];
+    let args = argv[1];
 
     // called like __({phrase: "Hello", locale: "en"})
     if (typeof phrase === 'object') {
@@ -297,7 +304,7 @@ module.exports = (function() {
   };
 
   i18n.__l = function i18nTranslationList(phrase) {
-    var translations = [];
+    let translations = [];
     Object.keys(locales).sort().forEach(function(l) {
       translations.push(i18n.__({ phrase: phrase, locale: l }));
     });
@@ -305,9 +312,9 @@ module.exports = (function() {
   };
 
   i18n.__h = function i18nTranslationHash(phrase) {
-    var translations = [];
+    let translations = [];
     Object.keys(locales).sort().forEach(function(l) {
-      var hash = {};
+      let hash = {};
       hash[l] = i18n.__({ phrase: phrase, locale: l });
       translations.push(hash);
     });
@@ -315,7 +322,7 @@ module.exports = (function() {
   };
 
   i18n.__n = function i18nTranslatePlural(singular, plural, count) {
-    var msg, namedValues, targetLocale, args = [];
+    let msg, namedValues, targetLocale, args = [];
 
     // Accept an object with named values as the last parameter
     if (argsEndWithNamedObject(arguments)) {
@@ -374,14 +381,14 @@ module.exports = (function() {
 
     // find the correct plural rule for given locale
     if (typeof msg === 'object') {
-      var p;
+      let p;
       // create a new Plural for locale
       // and try to cache instance
       if (PluralsForLocale[targetLocale]) {
         p = PluralsForLocale[targetLocale];
       } else {
         // split locales with a region code
-        var lc = targetLocale.toLowerCase().split(/[_-\s]+/)
+        let lc = targetLocale.toLowerCase().split(/[_-\s]+/)
           .filter(function(el){ return true && el; });
         // take the first part of locale, fallback to full locale
         p = new MakePlural(lc[0] || targetLocale);
@@ -400,15 +407,15 @@ module.exports = (function() {
 
     // when given an array of objects => setLocale on each
     if (Array.isArray(object) && typeof locale === 'string') {
-      for (var i = object.length - 1; i >= 0; i--) {
+      for (let i = object.length - 1; i >= 0; i--) {
         i18n.setLocale(object[i], locale, true);
       }
       return i18n.getLocale(object[0]);
     }
 
     // defaults to called like i18n.setLocale(req, 'en')
-    var targetObject = object;
-    var targetLocale = locale;
+    let targetObject = object;
+    let targetLocale = locale;
 
     // called like req.setLocale('en') or i18n.setLocale('en')
     if (locale === undefined && typeof object === 'string') {
@@ -478,7 +485,7 @@ module.exports = (function() {
   };
 
   i18n.getCatalog = function i18nGetCatalog(object, locale) {
-    var targetLocale;
+    let targetLocale;
 
     // called like i18n.getCatalog(req)
     if (typeof object === 'object' && typeof object.locale === 'string' && locale === undefined) {
@@ -540,11 +547,15 @@ module.exports = (function() {
   i18n._Messageformat = Messageformat;
   i18n._MessageformatInstanceForLocale = MessageformatInstanceForLocale;
 
+  i18n.updateCatalog = function(locale, catalog){
+    return locales[locale] = catalog;
+  };
+
   // ===================
   // = private methods =
   // ===================
 
-  var postProcess = function(msg, namedValues, args, count) {
+  let postProcess = function(msg, namedValues, args, count) {
 
     // test for parsable interval string
     if ((/\|/).test(msg)) {
@@ -570,14 +581,14 @@ module.exports = (function() {
     return msg;
   };
 
-  var argsEndWithNamedObject = function(args) {
+  let argsEndWithNamedObject = function(args) {
     return (args.length > 1 &&
       args[args.length - 1] !== null &&
       typeof args[args.length - 1] === 'object');
   };
 
-  var parseArgv = function(args) {
-    var namedValues, returnArgs;
+  let parseArgv = function(args) {
+    let namedValues, returnArgs;
 
     if (argsEndWithNamedObject(args)) {
       namedValues = args[args.length - 1];
@@ -593,14 +604,14 @@ module.exports = (function() {
   /**
    * registers all public API methods to a given response object when not already declared
    */
-  var applyAPItoObject = function(object) {
+  let applyAPItoObject = function(object) {
 
-    var alreadySetted = true;
+    let alreadySetted = true;
 
     // attach to itself if not provided
-    for (var method in api) {
+    for (let method in api) {
       if (api.hasOwnProperty(method)) {
-        var alias = api[method];
+        let alias = api[method];
 
         // be kind rewind, or better not touch anything already existing
         if (!object[alias]) {
@@ -634,13 +645,13 @@ module.exports = (function() {
   /**
    * tries to guess locales by scanning the given directory
    */
-  var guessLocales = function(directory) {
-    var entries = fs.readdirSync(directory);
-    var localesFound = [];
+  let guessLocales = function(directory) {
+    let entries = fs.readdirSync(directory);
+    let localesFound = [];
 
-    for (var i = entries.length - 1; i >= 0; i--) {
+    for (let i = entries.length - 1; i >= 0; i--) {
       if (entries[i].match(/^\./)) continue;
-      var localeFromFile = guessLocaleFromFile(entries[i]);
+      let localeFromFile = guessLocaleFromFile(entries[i]);
       if (localeFromFile) localesFound.push(localeFromFile);
     }
 
@@ -650,9 +661,9 @@ module.exports = (function() {
   /**
    * tries to guess locales from a given filename
    */
-  var guessLocaleFromFile = function(filename) {
-    var extensionRegex = new RegExp(extension + '$', 'g');
-    var prefixRegex = new RegExp('^' + prefix, 'g');
+  let guessLocaleFromFile = function(filename) {
+    let extensionRegex = new RegExp(extension + '$', 'g');
+    let prefixRegex = new RegExp('^' + prefix, 'g');
 
     if (prefix && !filename.match(prefixRegex)) return false;
     if (extension && !filename.match(extensionRegex)) return false;
@@ -663,9 +674,9 @@ module.exports = (function() {
    * guess language setting based on http headers
    */
 
-  var guessLanguage = function(request) {
+  let guessLanguage = function(request) {
     if (typeof request === 'object') {
-      var languageHeader = request.headers? request.headers['accept-language'] : undefined,
+      let languageHeader = request.headers? request.headers['accept-language'] : undefined,
         languages = [],
         regions = [];
 
@@ -676,7 +687,7 @@ module.exports = (function() {
 
       // a query parameter overwrites all
       if (queryParameter && request.url) {
-        var urlObj = url.parse(request.url, true);
+        let urlObj = url.parse(request.url, true);
         if (urlObj.query[queryParameter]) {
           logDebug('Overriding locale from query: ' + urlObj.query[queryParameter]);
           request.language = urlObj.query[queryParameter];
@@ -697,10 +708,10 @@ module.exports = (function() {
 
       // 'accept-language' is the most common source
       if (languageHeader) {
-        var acceptedLanguages = getAcceptedLanguagesFromHeader(languageHeader),
+        let acceptedLanguages = getAcceptedLanguagesFromHeader(languageHeader),
           match, fallbackMatch, fallback;
-        for (var i = 0; i < acceptedLanguages.length; i++) {
-          var lang = acceptedLanguages[i],
+        for (let i = 0; i < acceptedLanguages.length; i++) {
+          let lang = acceptedLanguages[i],
             lr = lang.split('-', 2),
             parentLang = lr[0],
             region = lr[1];
@@ -710,8 +721,8 @@ module.exports = (function() {
             fallback = fallbacks[lang];
             // Fallbacks for languages should be inserted
             // where the original, unsupported language existed.
-            var acceptedLanguageIndex = acceptedLanguages.indexOf(lang);
-            var fallbackIndex = acceptedLanguages.indexOf(fallback);
+            let acceptedLanguageIndex = acceptedLanguages.indexOf(lang);
+            let fallbackIndex = acceptedLanguages.indexOf(fallback);
             if(fallbackIndex > -1) {
               acceptedLanguages.splice(fallbackIndex, 1);
             }
@@ -759,15 +770,15 @@ module.exports = (function() {
   /**
    * Get a sorted list of accepted languages from the HTTP Accept-Language header
    */
-  var getAcceptedLanguagesFromHeader = function(header) {
-    var languages = header.split(','),
+  let getAcceptedLanguagesFromHeader = function(header) {
+    let languages = header.split(','),
       preferences = {};
     return languages.map(function parseLanguagePreference(item) {
-      var preferenceParts = item.trim().split(';q=');
+      let preferenceParts = item.trim().split(';q=');
       if (preferenceParts.length < 2) {
         preferenceParts[1] = 1.0;
       } else {
-        var quality = parseFloat(preferenceParts[1]);
+        let quality = parseFloat(preferenceParts[1]);
         preferenceParts[1] = quality ? quality : 0.0;
       }
       preferences[preferenceParts[0]] = preferenceParts[1];
@@ -784,8 +795,8 @@ module.exports = (function() {
    * searches for locale in given object
    */
 
-  var getLocaleFromObject = function(obj) {
-    var locale;
+  let getLocaleFromObject = function(obj) {
+    let locale;
     if (obj && obj.scope) {
       locale = obj.scope.locale;
     }
@@ -798,13 +809,13 @@ module.exports = (function() {
   /**
    * splits and parses a phrase for mathematical interval expressions
    */
-  var parsePluralInterval = function(phrase, count) {
-    var returnPhrase = phrase;
-    var phrases = phrase.split(/\|/);
+  let parsePluralInterval = function(phrase, count) {
+    let returnPhrase = phrase;
+    let phrases = phrase.split(/\|/);
 
     // some() breaks on 1st true
     phrases.some(function(p) {
-      var matches = p.match(/^\s*([\(\)\[\]\d,]+)?\s*(.*)$/);
+      let matches = p.match(/^\s*([\(\)\[\]\d,]+)?\s*(.*)$/);
 
       // not the same as in combined condition
       if (matches[1]) {
@@ -828,7 +839,7 @@ module.exports = (function() {
    * [20,] - all numbers ≥20 (matches: 20, 21, 22, ...)
    * [,20] - all numbers ≤20 (matches: 20, 21, 22, ...)
    */
-  var matchInterval = function(number, interval) {
+  let matchInterval = function(number, interval) {
     interval = parseInterval(interval);
     if (interval && typeof number === 'number') {
       if (interval.from.value === number) {
@@ -847,7 +858,7 @@ module.exports = (function() {
   /**
    * read locale file, translate a msg and write to fs if new
    */
-  var translate = function(locale, singular, plural, skipSyncToAllFiles) {
+  let translate = function(locale, singular, plural, skipSyncToAllFiles) {
 
     // add same key to all translations
     if (!skipSyncToAllFiles && syncFiles) {
@@ -881,10 +892,10 @@ module.exports = (function() {
     }
 
     // dotnotaction add on, @todo: factor out
-    var defaultSingular = singular;
-    var defaultPlural = plural;
+    let defaultSingular = singular;
+    let defaultPlural = plural;
     if (objectNotation) {
-      var indexOfColon = singular.indexOf(':');
+      let indexOfColon = singular.indexOf(':');
       // We compare against 0 instead of -1 because
       // we don't really expect the string to start with ':'.
       if (0 < indexOfColon) {
@@ -900,8 +911,8 @@ module.exports = (function() {
       }
     }
 
-    var accessor = localeAccessor(locale, singular);
-    var mutator = localeMutator(locale, singular);
+    let accessor = localeAccessor(locale, singular);
+    let mutator = localeMutator(locale, singular);
 
     if (plural) {
       if (!accessor()) {
@@ -925,11 +936,11 @@ module.exports = (function() {
    * initialize the same key in all locales
    * when not already existing, checked via translate
    */
-  var syncToAllFiles = function(singular, plural) {
+  let syncToAllFiles = function(singular, plural) {
     // iterate over locales and translate again
     // this will implicitly write/sync missing keys
     // to the rest of locales
-    for (var l in locales) {
+    for (let l in locales) {
       translate(l, singular, plural, true);
     }
   };
@@ -945,23 +956,23 @@ module.exports = (function() {
    * @returns {Function} A function that, when invoked, returns the current value stored
    * in the object at the requested location.
    */
-  var localeAccessor = function(locale, singular, allowDelayedTraversal) {
+  let localeAccessor = function(locale, singular, allowDelayedTraversal) {
     // Bail out on non-existent locales to defend against internal errors.
     if (!locales[locale]) return Function.prototype;
 
     // Handle object lookup notation
-    var indexOfDot = objectNotation && singular.lastIndexOf(objectNotation);
+    let indexOfDot = objectNotation && singular.lastIndexOf(objectNotation);
     if (objectNotation && (0 < indexOfDot && indexOfDot < singular.length - 1)) {
       // If delayed traversal wasn't specifically forbidden, it is allowed.
       if (typeof allowDelayedTraversal === 'undefined') allowDelayedTraversal = true;
       // The accessor we're trying to find and which we want to return.
-      var accessor = null;
+      let accessor = null;
       // An accessor that returns null.
-      var nullAccessor = function() {
+      let nullAccessor = function() {
         return null;
       };
       // Do we need to re-traverse the tree upon invocation of the accessor?
-      var reTraverse = false;
+      let reTraverse = false;
       // Split the provided term and run the callback for each subterm.
       singular.split(objectNotation).reduce(function(object, index) {
         // Make the accessor return null.
@@ -1011,27 +1022,27 @@ module.exports = (function() {
    * @returns {Function} A function that takes one argument. When the function is
    * invoked, the targeted translation term will be set to the given value inside the locale table.
    */
-  var localeMutator = function(locale, singular, allowBranching) {
+  let localeMutator = function(locale, singular, allowBranching) {
     // Bail out on non-existent locales to defend against internal errors.
     if (!locales[locale]) return Function.prototype;
 
     // Handle object lookup notation
-    var indexOfDot = objectNotation && singular.lastIndexOf(objectNotation);
+    let indexOfDot = objectNotation && singular.lastIndexOf(objectNotation);
     if (objectNotation && (0 < indexOfDot && indexOfDot < singular.length - 1)) {
       // If branching wasn't specifically allowed, disable it.
       if (typeof allowBranching === 'undefined') allowBranching = false;
       // This will become the function we want to return.
-      var accessor = null;
+      let accessor = null;
       // An accessor that takes one argument and returns null.
-      var nullAccessor = function() {
+      let nullAccessor = function() {
         return null;
       };
       // Fix object path.
-      var fixObject = function() {
+      let fixObject = function() {
         return {};
       };
       // Are we going to need to re-traverse the tree when the mutator is invoked?
-      var reTraverse = false;
+      let reTraverse = false;
       // Split the provided term and run the callback for each subterm.
       singular.split(objectNotation).reduce(function(object, index) {
         // Make the mutator do nothing.
@@ -1091,8 +1102,8 @@ module.exports = (function() {
   /**
    * try reading a file
    */
-  var read = function(locale) {
-    var localeFile = {},
+  let read = function(locale) {
+    let localeFile = {},
       file = getStorageFilePath(locale);
     try {
       logDebug('read ' + file + ' for locale: ' + locale);
@@ -1123,8 +1134,8 @@ module.exports = (function() {
   /**
    * try writing a file in a created directory
    */
-  var write = function(locale) {
-    var stats, target, tmp;
+  let write = function(locale) {
+    let stats, target, tmp;
 
     // don't write new locale information to disk if updateFiles isn't true
     if (!updateFiles) {
@@ -1165,9 +1176,9 @@ module.exports = (function() {
   /**
    * basic normalization of filepath
    */
-  var getStorageFilePath = function(locale) {
+  let getStorageFilePath = function(locale) {
     // changed API to use .json as default, #16
-    var ext = extension || '.json',
+    let ext = extension || '.json',
       filepath = path.normalize(directory + pathsep + prefix + locale + ext),
       filepathJS = path.normalize(directory + pathsep + prefix + locale + '.js');
     // use .js as fallback if already existing
