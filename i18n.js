@@ -702,7 +702,11 @@ module.exports = (function() {
 
       // a cookie overwrites headers
       if (cookiename && request.cookies && request.cookies[cookiename]) {
-        request.language = request.cookies[cookiename];
+        if(typeof request.cookies[cookiename] === 'object'){
+          request.language = request.cookies[cookiename].lang;
+        }else{
+          request.language = request.cookies[cookiename];
+        }
         return i18n.setLocale(request, request.language);
       }
 
